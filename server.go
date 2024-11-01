@@ -1,31 +1,44 @@
 package main
 
 import (
-	"fmt"
+	"log"
 	"net"
 	"sync"
 	
 )
-// TCP Server Function
-// Listen for incoming connections
-// Accept an incoming connection
-// Handle the connection in a new goroutin
-func startServer(wg *sync.WaitGroup) {
-	defer wg.Done()
-	listener, err := net.Listen("tcp", "127.0.0.1:8080")
-	if err != nil {
-		fmt.Printf("Error starting TCP server: %v\n", err)
-		return
-	}
-	defer listener.Close()
-	fmt.Println("Server listening on 127.0.0.1:8080")
+const maxConnections=10
 
-	for {
-		conn, err := listener.Accept()
-		if err != nil {
-			fmt.Printf("Error accepting connection: %v\n", err)
-			continue
-		}
-		go handleConnection(conn)
+var (
+	clients =make(map[net.Conn]*Client)
+	mutex sync.Mutex
+	messageLog []string
+	connections int
+)
+//Handles setting up and 
+//Starting the TCP server
+//And managing the connections
+func startServer(port string){
+listener,err:=net.Listen("tcp",":"+port)
+if err !=nil{
+	log.Fatal("Error starting server: %v", err)
+}
+defer listener.Close()
+
+for{
+	conn,err:=listener.Accept()
+	if err !=nil{
+		log.Printf("Error accepting connection: %v",err)
+		continue
 	}
+	mutex.Lock()
+	if connections>=maxConnections{
+		conn.Write([]byte("Server is full. Try again later. \n"))
+		conn.Close()
+		mutex.Unlock()
+		continue
+	}
+	connections++
+	mutex.Unlock()
+	go handleConnection(conn)
+}
 }
