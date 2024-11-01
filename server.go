@@ -9,7 +9,6 @@ import (
 const maxConnections=10
 
 var (
-	clients =make(map[net.Conn]*Client)
 	mutex sync.Mutex
 	messageLog []string
 	connections int

@@ -7,7 +7,7 @@ import (
 	"time"
 	"strings"
 )
-
+var clients =make(map[net.Conn]*Client)
 //Client represents a chat client
 type Client struct{
 	conn net.Conn
