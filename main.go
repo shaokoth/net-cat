@@ -2,26 +2,20 @@ package main
 
 import (
 	"fmt"
+	"net"
 	"os"
 	"sync"
-
 )
-// Main Function
-func main() {
-	if len(os.Args) > 2 {
+const defaultPort="8989"
+
+func main(){
+	port:=defaultPort
+	if len(os.Args)>2||(len(os.Args)==2 && os.Args[1]=="localhost"){
 		fmt.Println("[USAGE]: ./TCPChat $port")
 		return
+	}else if len(os.Args)==2{
+		port=os.Args[1]
 	}
-	var wg sync.WaitGroup
-
-	// Start the server
-	wg.Add(1)
-	go startServer(&wg)
-
-	// Start the client
-	wg.Add(1)
-	go startClient(&wg)
-
-	// Wait for both server and client to finish
-	wg.Wait()
+	fmt.Printf("Listening on the port :%s\n",port)
+	startServer(port)
 }
