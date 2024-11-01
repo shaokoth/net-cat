@@ -58,7 +58,7 @@ for{
 	mutex.Unlock()
 
 }
-mutex.Unlock()
+mutex.Lock()
 delete(clients,conn)
 messageLog=append(messageLog, fmt.Sprintf("%s has left our chat...",name))
 broadcast(fmt.Sprintf("%s has left our chat...",name))
