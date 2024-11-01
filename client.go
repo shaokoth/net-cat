@@ -7,43 +7,63 @@ import (
 	"os"
 	"sync"
 	"time"
+	"strings"
 )
-// TCP Client Function
-// Wait briefly to ensure the server is ready
-// Connect to the server
-// Read user input and send it to the server
-// Exit the client if "exit" is entered
-// Send the message to the server
-// Read the response from the server
 
-func startClient(wg *sync.WaitGroup) {
-	defer wg.Done()
-	time.Sleep(1 * time.Second)
-	conn, err := net.Dial("tcp", "127.0.0.1:8080")
-	if err != nil {
-		fmt.Printf("Error connecting to server: %v\n", err)
-		return
-	}
+//Client represents a chat client
+type Client struct{
+	conn net.Conn
+	name string
+	messages []string
+}
+//Connects to the Server using TCP
+//Ask for client name and handle empty name case
+//Announce new client and add to clients map
+//Handles client disconnection
+func handleConnection(conn net.Conn){
 	defer conn.Close()
-	fmt.Println("Connected to server")
-	reader := bufio.NewReader(os.Stdin)
-	for {
-		fmt.Print("Enter message to send (or type 'exit' to quit): ")
-		message, _ := reader.ReadString('\n')
-		if message == "exit\n" {
-			fmt.Println("Exiting client.")
-			break
-		}
-		_, err = conn.Write([]byte(message))
-		if err != nil {
-			fmt.Printf("Error writing to server: %v\n", err)
-			break
-		}
-		response, err := bufio.NewReader(conn).ReadString('\n')
-		if err != nil {
-			fmt.Printf("Error reading from server: %v\n", err)
-			break
-		}
-		fmt.Printf("Server response: %s", response)
+conn.Write([]byte(welcomeMessage()))
+conn.Write([]byte("[ENTER YOUR NAME]:"))
+nameReader:=bufio.NewReader(conn)
+name,err:=nameReader.ReadString('\n')
+if err !=nil || strings.TrimSpace(name)==""{
+conn.Write([]byte("Invalid name. Disconnecting...\n"))
+return
+}
+name=strings.TrimSpace(name)
+
+mutex.Lock()
+client:=&Client{conn: conn, name: name}
+clients[conn]=client
+messageLog=append(messageLog, fmt.Sprintf("%s has joined our chat...",name))
+broadcast(fmt.Sprintf("%s has joined our chat...",name))
+sendPreviousMessages(conn)
+mutex.Unlock()
+
+reader:= bufio.NewReader(conn)
+for{
+	message, err:=reader.ReadString('\n')
+	if err !=nil{
+		break
 	}
+	message=strings.TrimSpace(message)
+	if message ==""{
+		continue
+	}
+
+	timestamp:=time.Now().Format("2006-01-02 15:04:05")
+	fullMessage:=fmt.Sprintf("[%s][%s]: %s",timestamp,name,message)
+
+	mutex.Lock()
+	messageLog=append(messageLog, fullMessage)
+	broadcast(fullMessage)
+	mutex.Unlock()
+
+}
+mutex.Unlock()
+delete(clients,conn)
+messageLog=append(messageLog, fmt.Sprintf("%s has left our chat...",name))
+broadcast(fmt.Sprintf("%s has left our chat...",name))
+connections--
+mutex.Unlock()
 }
