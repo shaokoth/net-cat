@@ -4,15 +4,15 @@ import (
 	"net"
 )
 
-func broadcast(message string){
-	for _,client:=range clients{
-		client.conn.Write([]byte(message+"\n"))
+func broadcast(message string) {
+	for _, client := range clients {
+		client.conn.Write([]byte(message + "\n"))
 	}
 }
 
-func sendPreviousMessages(conn net.Conn){
-	for _,msg:=range messageLog{
-		conn.Write([]byte(msg+"\n"))
+func sendPreviousMessages(conn net.Conn) {
+	for _, msg := range messageLog {
+		conn.Write([]byte(msg + "\n"))
 	}
 }
 
@@ -36,4 +36,3 @@ _)      \.___.,|     .'
      -'       --'
 `
 }
-
