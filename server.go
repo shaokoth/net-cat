@@ -20,7 +20,7 @@ var (
 func startServer(port string){
 listener,err:=net.Listen("tcp",":"+port)
 if err !=nil{
-	log.Fatal("Error starting server: %v", err)
+	log.Fatalf("Error starting server: %v", err)
 }
 defer listener.Close()
 

@@ -2,9 +2,7 @@ package main
 
 import (
 	"fmt"
-	"net"
 	"os"
-	"sync"
 )
 const defaultPort="8989"
 

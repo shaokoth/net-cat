@@ -4,8 +4,6 @@ import (
 	"bufio"
 	"fmt"
 	"net"
-	"os"
-	"sync"
 	"time"
 	"strings"
 )
