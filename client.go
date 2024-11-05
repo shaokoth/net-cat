@@ -21,7 +21,6 @@ type Client struct {
 // Announce new client and add to clients map
 // Handles client disconnection
 func handleConnection(conn net.Conn) {
-	defer conn.Close()
 	conn.Write([]byte(welcomeMessage()))
 	conn.Write([]byte("[ENTER YOUR NAME]:"))
 	nameReader := bufio.NewReader(conn)
