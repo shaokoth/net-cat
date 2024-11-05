@@ -1,7 +1,9 @@
 package main
 
 import (
+	"fmt"
 	"net"
+	"os"
 )
 
 func broadcast(message string) {
@@ -17,22 +19,10 @@ func sendPreviousMessages(conn net.Conn) {
 }
 
 func welcomeMessage() string {
-	return `Welcome to TCP-Chat!
-         _nnnn_
-        dGGGGMMb
-       @p~qp~~qMb
-       M|@||@) M|
-       @,----.JM|
-      JS^\__/  qKL
-     dZP        qKRb
-    dZP          qKKb
-   fZP            SMMb
-   HZM            MMMM
-   FqM            MMMM
- __| ".        |\dS"qML
- |    .       |' \Zq
-_)      \.___.,|     .'
-\____   )MMMMMP|   .'
-     -'       --'
-`
+	filepath := "net.text"
+     data, err := os.ReadFile(filepath)
+     if err != nil {
+          fmt.Println("error reading file")
+     }
+     return string(data)
 }
