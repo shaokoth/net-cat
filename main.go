@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"os"
+	"net-cat/server"
 )
 
 const defaultPort = "8989"
@@ -16,5 +17,5 @@ func main() {
 		port = os.Args[1]
 	}
 	fmt.Printf("Listening on the port :%s\n", port)
-	startServer(port)
+	server.StartServer(port)
 }
