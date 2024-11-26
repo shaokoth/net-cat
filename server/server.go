@@ -24,9 +24,9 @@ var (
 	clients = make(map[net.Conn]*Client)
 )
 
-// Handles setting up and
-// Starting the TCP server
-// And managing the connections
+/*Handles setting up and
+ Starting the TCP server
+ And managing the connections*/
 func StartServer(port string) {
 	listener, err := net.Listen("tcp", ":"+port)
 	if err != nil {
@@ -47,17 +47,17 @@ func StartServer(port string) {
 			mutex.Unlock()
 			continue
 		}
-		connections++
 		mutex.Unlock()
+
 		go handleConnection(conn)
 	}
 }
 
-// Connects to the Server using TCP
-// Ask for client name and handle empty name case
-// Announce new client and add to clients map
-// Handles client disconnection
+// Connects to the Server using TCP 
 func handleConnection(conn net.Conn) {
+	defer conn.Close()
+
+	// print welcome message and ask for client name and handle empty name case
 	conn.Write([]byte(welcomeMessage()))
 	conn.Write([]byte("\n[ENTER YOUR NAME]:"))
 	nameReader := bufio.NewReader(conn)
@@ -69,12 +69,15 @@ func handleConnection(conn net.Conn) {
 	name = strings.TrimSpace(name)
 
 	mutex.Lock()
+	// Announce new client and add to clients map
 	client := &Client{conn: conn, name: name}
 	clients[conn] = client
-	messageLog = append(messageLog, fmt.Sprintf("%s has joined our chat...", name))
-	broadcast(fmt.Sprintf("%s has joined our chat...", name), conn)
-	sendPreviousMessages(conn)
+	connections++
 	mutex.Unlock()
+	
+	broadcast(fmt.Sprintf("%s has joined our chat...", name), conn)
+
+	sendPreviousMessages(conn)
 
 	reader := bufio.NewReader(conn)
 	for {
@@ -108,7 +111,7 @@ func handleConnection(conn net.Conn) {
 	// Handle client disconnection
 	mutex.Lock()
 	delete(clients, conn)
-	messageLog = append(messageLog, fmt.Sprintf("%s has left our chat...", name))
+	//messageLog = append(messageLog, fmt.Sprintf("%s has left our chat...", name))
 	broadcast(fmt.Sprintf("%s has left our chat...", name), conn)
 	connections--
 	mutex.Unlock()
@@ -132,7 +135,8 @@ func welcomeMessage() string {
 	filepath := "./server/net.txt"
 	data, err := os.ReadFile(filepath)
 	if err != nil {
-		fmt.Println("error reading file")
+		log.Printf("error reading file: %v", err)
+		return "Welcome to the Chat server"
 	}
 	return string(data)
 }
