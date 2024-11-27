@@ -11,7 +11,7 @@ import (
 const testPort = "8081"
 
 func TestStartServer(t *testing.T) {
-	// Start the server in a separate goroutine
+	// Start the server in a separate goroutine to stop blocking
 	go func() {
 		StartServer(testPort)
 	}()
@@ -68,4 +68,23 @@ func TestStartServer(t *testing.T) {
 			conn.Close()
 		}
 	})
+}
+
+func TestHandleDisconnection(t *testing.T) {
+	// Connect to the server
+	conn, err := net.Dial("tcp", ":"+testPort)
+	if err != nil {
+		t.Fatalf("Failed to connect to server: %v", err)
+	}
+
+	// Disconnect client
+	conn.Close()
+	time.Sleep(500 * time.Millisecond) // Allow server to process disconnection
+
+	// Verify that connections are reduced
+	mutex.Lock()
+	defer mutex.Unlock()
+	if connections != 0 {
+		t.Errorf("Expected 0 connections after disconnection, got %d", connections)
+	}
 }

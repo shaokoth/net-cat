@@ -132,7 +132,7 @@ func sendPreviousMessages(conn net.Conn) {
 }
 
 func welcomeMessage() string {
-	filepath := "./server/net.txt"
+	filepath := "./net.txt"
 	data, err := os.ReadFile(filepath)
 	if err != nil {
 		log.Printf("error reading file: %v", err)
